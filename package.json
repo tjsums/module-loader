@@ -1,0 +1,25 @@
+{
+  "name": "angular-module-loader",
+  "version": "1.0.0",
+  "description": "AngularJS Module Loader",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hcmui/module-loader.git"
+  },
+  "author": "HCM",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hcmui/module-loader/issues"
+  },
+  "homepage": "https://github.com/hcmui/module-loader#readme",
+  "dependencies": {
+    "acorn": "^5.0.2",
+    "astring": "^0.9.1",
+    "mustache": "^2.3.0",
+    "traverse": "^0.6.6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+	"name":"org_emp",
+	"loader":"lazy",
+	"app_name":"myApp",
+	"states":[
+	{
+		"name":"org1",
+		"url":"/org1",
+		"templateUrl":"./template.html",
+		"require":"./controller.js"
+	}],
+	"requires":[
+		"./controller2.js"
+	]
+}
