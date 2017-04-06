@@ -1,6 +1,6 @@
 {
   "name": "hcm-module-loader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "HCM AngularJS Module Loader",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,7 @@
   "dependencies": {
     "acorn": "^5.0.2",
     "astring": "^0.9.1",
+    "loader-utils": "^1.1.0",
     "mustache": "^2.3.0",
     "traverse": "^0.6.6"
   }

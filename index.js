@@ -7,6 +7,7 @@
 const acorn = require('acorn');
 const {default: generate, defaultGenerator} = require('astring');
 const traverse = require('traverse');
+const loaderUtils = require('loader-utils');
 
 let parseModuleName = function (template_nodes, module_name) {
     /**
@@ -19,9 +20,12 @@ let parseModuleName = function (template_nodes, module_name) {
             && node.type === 'Literal'
             && node.value
             && node.value === '$module_name';
-    })[0];
-    node.value = module_name;
-    node.raw = '"' + module_name + '"';
+    });
+    if (node.length > 0) {
+        node[0].value = module_name;
+        node[0].raw = '"' + module_name + '"';
+    }
+
 };
 
 let parseModuleRequire = function (template_nodes, require_list) {
@@ -270,7 +274,7 @@ var loader = function () {
 var $states_function=function ($stateProvider) {
 };
 
-export default $states_function;
+module.exports = $states_function;
 `;
 
 
@@ -296,7 +300,7 @@ var loader = function () {
 var $states_function=function ($stateProvider) {
 };
 
-export default $states_function;
+module.exports = $states_function;
 `;
 
 
@@ -305,6 +309,22 @@ module.exports = function (source) {
      * 输出主函数
      * @type {Object}
      */
+
+    this.cacheable && this.cacheable();
+
+    const options = Object.assign(
+        {
+            target: null
+        },
+        loaderUtils.getOptions(this)
+    );
+    for(let key in options){
+        let reg=new RegExp("\\$\\{"+key+"\\}","g");
+        if(options.hasOwnProperty(key)){
+            (source=source.replace(reg,options[key]||''));
+        }
+    }
+
     let meta_json = eval("(" + source + ")");
 
     let meta = acorn.parse('var meta=' + source, {
@@ -314,7 +334,7 @@ module.exports = function (source) {
     let meta_nodes = traverse(meta).nodes();
 
     let template = acorn.parse(
-        (meta_json && meta_json.loader && meta_json.loader === 'lazy') ? output_template_lazy : output_template,
+        (meta_json && meta_json['loader'] && meta_json['loader'] === 'normal') ? output_template : output_template_lazy,
         {
             ecmaVersion: 6,
             sourceType: 'module',
@@ -324,17 +344,29 @@ module.exports = function (source) {
     let template_nodes = traverse(template).nodes();
 
     let module_name = meta_json.name;
+    if(options.target){
+        module_name=module_name+'.'+options.target;
+    }
     parseModuleName(template_nodes, module_name);
 
-    let module_require_list = meta_json.requires || [];
-    module_require_list = module_require_list.concat(meta_json.states.filter(state => state.require).map(state => state.require));
+    let module_require_list = meta_json['requires'] || [];
+    if (options.target) {
+        module_require_list = module_require_list.concat(meta_json['requires_' + options.target] || [])
+    }
+
+    let target_states=meta_json['states'].filter(function(_state){
+        return (!options['target']||!_state['target']||_state['target']===options['target']||_state['target'].indexOf(options['target'])>-1)
+    });
+
+    module_require_list = module_require_list.concat(target_states.filter(state=>state['require']).map(state => state['require']));
+
     parseModuleRequire(template_nodes, module_require_list);
 
-    let module_template_list = meta_json.states.filter(state => state.templateUrl).map(state => state.templateUrl);
+    let module_template_list = target_states.filter(state => state['templateUrl']).map(state => state['templateUrl']);
     parseModuleTemplateRequire(template_nodes, module_template_list);
 
 
-    let app_name = meta_json.app_name;
+    let app_name = meta_json['app_name'];
     let states_nodes = meta_nodes.filter(function (node) {
         return node
             && node.type
@@ -345,7 +377,17 @@ module.exports = function (source) {
             && node.key.value
             && node.key.value === 'states';
     });
-    parseModuleStates(template_nodes, states_nodes[0].value.elements, app_name);
+    let target_state_nodes=states_nodes[0].value.elements.filter(function(_state){
+        if(!options.target){
+            return true;
+        }
+        let target_node=_state.properties.filter(function (_p) {
+            return _p.key&&_p.key.value&&_p.key.value==='target';
+        });
+
+        return (target_node.length<1||(target_node[0]&&target_node[0].value&&target_node[0].value.value&&target_node[0].value.value===options.target));
+    });
+    parseModuleStates(template_nodes, target_state_nodes, app_name);
 
     return generate(template, {
         indent: '   ',
