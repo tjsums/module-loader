@@ -1,6 +1,9 @@
 /**
  * AngularJs 模块自动加载器
  * 根据模块定义文件，生成对应的模块文件
+ * 支持参数，用于：
+ * 1、模板替换
+ * 2、target参数用于require和state过滤
  * 定义文件模板见./test/module.json
  */
 
