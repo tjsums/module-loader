@@ -113,11 +113,12 @@ let getTemplateProviderNode = function (tpl_name) {
      * @type {string}
      */
     let tpl = `var templateProvider=function(){
-		return new Promise(resolve=>{
-			loader().then(function (_module) {
-				resolve(_module['${tpl_name}']);
-			})
+        var $q=angular.injector(['ng']).get('$q');
+        var defer= $q.defer();
+        loader($q).then(function (_module) {
+				defer.resolve(_module['${tpl_name}']);
 		})
+		return defer.promise
 	}`;
     let tpl_asd = acorn.parse(tpl);
     return tpl_asd.body[0].declarations[0].init;
@@ -128,13 +129,13 @@ let getModuleResolveNode = function (app_name) {
      * 获取State定义中Resolve的模板Function
      * @type {string}
      */
-    let tpl = `var moduleResolve=["$ocLazyLoad", function ($ocLazyLoad) {
-		return new Promise(resolve=> {
-			loader().then(function (_module) {	
+    let tpl = `var moduleResolve=["$ocLazyLoad","$q", function ($ocLazyLoad,$q) {
+        var defer=$q.defer();
+        loader($q).then(function (_module) {	
 				$ocLazyLoad.load({"name": "${app_name}"});
-				resolve();
-			})
+				defer.resolve();
 		});
+		return defer.promise;
 	}]`;
     let tpl_asd = acorn.parse(tpl);
     return tpl_asd.body[0].declarations[0].init;
@@ -264,14 +265,16 @@ let parseModuleStates = function (template_nodes, state_list, app_name) {
 let output_template = `
 'use strict';
 
-var loader = function () {
-    return new Promise(resolve => {    
-		var $require_function=function(){};
-        $require_function();
+var loader = function ($q) {
+    var defer=$q.defer();
+        
+    var $require_function=function(){};
+    $require_function();
 
-        var $template_require_object={};
-        resolve($template_require_object);
-    });
+    var $template_require_object={};
+    defer.resolve($template_require_object);
+    
+    return defer.promise;
 };
 
 var $states_function=function ($stateProvider) {
@@ -288,7 +291,7 @@ module.exports = $states_function;
 let output_template_lazy = `
 'use strict';
 
-var loader = function () {
+var loader = function ($q) {
     return new Promise(resolve => {
         require.ensure([], function () {
 			var $require_function=function(){};
