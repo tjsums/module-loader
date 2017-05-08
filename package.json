@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hcmui/module-loader.git"
+    "url": "git+https://github.com/tjsums/module-loader.git"
   },
   "author": "HCM",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/hcmui/module-loader/issues"
+    "url": "https://github.com/tjsums/module-loader/issues"
   },
-  "homepage": "https://github.com/hcmui/module-loader#readme",
+  "homepage": "https://github.com/tjsums/module-loader#readme",
   "dependencies": {
     "acorn": "^5.0.2",
     "astring": "^0.9.1",
