@@ -319,7 +319,8 @@ module.exports = function (source) {
     const options = Object.assign(
         {
             app: null,
-            target: null
+            target: null,
+            path:null
         },
         loaderUtils.getOptions(this)
     );
@@ -349,6 +350,11 @@ module.exports = function (source) {
     let template_nodes = traverse(template).nodes();
 
     let module_name = meta_json.name;
+
+    if(options.path){
+      module_name=options.path+module_name;
+    }
+    
     if(options.target){
         module_name=module_name+'.'+options.target;
     }

@@ -1,6 +1,6 @@
 {
   "name": "hcm-module-loader",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "HCM AngularJS Module Loader",
   "main": "index.js",
   "scripts": {
