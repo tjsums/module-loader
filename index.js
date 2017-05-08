@@ -290,8 +290,8 @@ let output_template_lazy = `
 'use strict';
 
 var loader = function () {
-    return new Promise(funtion(resolve){
-        return require.ensure([], function () {
+    return new Promise(function(resolve){
+        require.ensure([], function () {
 			       var $require_function=function(){};
              $require_function();
 
@@ -318,6 +318,7 @@ module.exports = function (source) {
 
     const options = Object.assign(
         {
+            app: null,
             target: null
         },
         loaderUtils.getOptions(this)
