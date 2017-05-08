@@ -107,14 +107,15 @@ let parseModuleTemplateRequire = function (template_nodes, template_list) {
     })
 };
 
+
 let getTemplateProviderNode = function (tpl_name) {
     /**
      * 获取State定义中TemplateProvider的模板Function
      * @type {string}
      */
     let tpl = `var templateProvider=function(){
-		return new Promise(resolve=>{
-			loader().then(function (_module) {
+		return new Promise(function(resolve){
+			return loader().then(function (_module) {
 				resolve(_module['${tpl_name}']);
 			})
 		})
@@ -129,8 +130,8 @@ let getModuleResolveNode = function (app_name) {
      * @type {string}
      */
     let tpl = `var moduleResolve=["$ocLazyLoad", function ($ocLazyLoad) {
-		return new Promise(resolve=> {
-			loader().then(function (_module) {	
+		return new Promise(function(resolve){
+			return loader().then(function (_module) {
 				$ocLazyLoad.load({"name": "${app_name}"});
 				resolve();
 			})
@@ -265,8 +266,8 @@ let output_template = `
 'use strict';
 
 var loader = function () {
-    return new Promise(resolve => {    
-		var $require_function=function(){};
+    return new Promise(function(resolve) {
+		    var $require_function=function(){};
         $require_function();
 
         var $template_require_object={};
@@ -289,13 +290,13 @@ let output_template_lazy = `
 'use strict';
 
 var loader = function () {
-    return new Promise(resolve => {
-        require.ensure([], function () {
-			var $require_function=function(){};
-            $require_function();
+    return new Promise(funtion(resolve){
+        return require.ensure([], function () {
+			       var $require_function=function(){};
+             $require_function();
 
-            var $template_require_object={};
-            resolve($template_require_object);
+             var $template_require_object={};
+             resolve($template_require_object);
         }, "$module_name");
     });
 };
